@@ -1,54 +1,53 @@
 let records = [];
 
-function addRecord() {
-    const subject = document.getElementById("subject").value;
-    const marks = parseInt(document.getElementById("marks").value);
-
-    if (!subject || isNaN(marks)) {
-        alert("Enter valid data");
-        return;
-    }
-
-    records.push({ subject, marks });
-
-    displayRecords();
-    calculateAverage();
-
-    document.getElementById("subject").value = "";
-    document.getElementById("marks").value = "";
+// Page Switching Logic
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
 }
 
-function displayRecords() {
-    const list = document.getElementById("list");
-    list.innerHTML = "";
+// Add Record Logic
+function addEntry() {
+    let sub = document.getElementById('subject').value;
+    let mrk = parseFloat(document.getElementById('marks').value);
 
-    records.forEach((record, index) => {
-        const li = document.createElement("li");
-        li.textContent = `${record.subject}: ${record.marks}`;
+    if(sub && mrk) {
+        records.push({sub, mrk});
+        updateUI();
+        document.getElementById('subject').value = '';
+        document.getElementById('marks').value = '';
+    } else {
+        alert("Please fill all fields!");
+    }
+}
 
-        const delBtn = document.createElement("button");
-        delBtn.textContent = "Delete";
-        delBtn.onclick = () => deleteRecord(index);
+function updateUI() {
+    // Update Table
+    let table = document.getElementById('tableBody');
+    table.innerHTML = "";
+    let total = 0;
 
-        li.appendChild(delBtn);
-        list.appendChild(li);
+    records.forEach(item => {
+        total += item.mrk;
+        let status = item.mrk >= 40 ? "Pass" : "Fail";
+        table.innerHTML += `<tr><td>${item.sub}</td><td>${item.mrk}</td><td>${status}</td></tr>`;
     });
+
+    // Update Report Page
+    let avg = records.length > 0 ? (total / records.length).toFixed(2) : 0;
+    document.getElementById('totalSub').innerText = records.length;
+    document.getElementById('avgVal').innerText = avg + "%";
+    
+    let grade = "N/A";
+    if(avg >= 90) grade = "A+";
+    else if(avg >= 75) grade = "A";
+    else if(avg >= 50) grade = "B";
+    else if(avg > 0) grade = "C";
+    document.getElementById('grade').innerText = grade;
 }
 
-function deleteRecord(index) {
-    records.splice(index, 1);
-    displayRecords();
-    calculateAverage();
-}
-
-function calculateAverage() {
-    if (records.length === 0) {
-        document.getElementById("average").textContent = "Average: 0";
-        return;
-    }
-
-    let total = records.reduce((sum, r) => sum + r.marks, 0);
-    let avg = (total / records.length).toFixed(2);
-
-    document.getElementById("average").textContent = "Average: " + avg;
+function resetAll() {
+    records = [];
+    updateUI();
+    showPage('home');
 }
